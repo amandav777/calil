@@ -1,0 +1,393 @@
+:root {
+    --bg-color: #050505;
+    --envelope-dark: #111111;
+    --envelope-light: #1a1a1a;
+    --card-bg: #0d0614;
+    --text-primary: #e0e0e0;
+    --text-accent: #7852ff;
+    --seal-glow: rgba(120, 82, 255, 0.4);
+    --border-color: #2a1b42;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Playfair Display', serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-image: radial-gradient(circle at center, #11081f 0%, #050505 100%);
+}
+
+h1, h2, .upload-btn {
+    font-family: 'Cinzel', serif;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Envelope Styles */
+.envelope-wrapper {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    perspective: 1000px;
+    transition: transform 0.5s ease;
+}
+
+.envelope {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: var(--envelope-light);
+    border-radius: 4px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+.envelope-body {
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 300px 200px 300px;
+    border-color: transparent transparent var(--envelope-dark) transparent;
+    z-index: 3;
+}
+
+.envelope-front {
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 200px 300px 200px 300px;
+    border-color: transparent var(--envelope-dark) var(--envelope-dark) var(--envelope-light);
+    z-index: 4;
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.envelope-flap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 200px 300px 0 300px;
+    border-color: #151515 transparent transparent transparent;
+    z-index: 6;
+    transform-origin: top;
+    transition: transform 1s ease-in-out, z-index 0s 0.5s;
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
+}
+
+.envelope-wrapper.open .envelope-flap {
+    transform: rotateX(180deg);
+    z-index: 1;
+    transition: transform 1s ease-in-out, z-index 0s 0.5s;
+}
+
+/* Seal */
+.seal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    z-index: 7;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.5s ease;
+    border-radius: 50%;
+}
+
+.seal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 2;
+}
+
+.seal .glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--seal-glow);
+    filter: blur(15px);
+    z-index: 1;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+}
+
+.seal:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.envelope-wrapper.open .seal {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(1.5);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Card */
+.card {
+    position: absolute;
+    bottom: 10px;
+    left: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 20px);
+    background: linear-gradient(135deg, #160a24 0%, #0d0614 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    z-index: 2;
+    transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.envelope-wrapper.open .card {
+    transform: translateY(-250px);
+    z-index: 5;
+    transition-delay: 0.8s;
+}
+
+.envelope-wrapper.expanded .envelope {
+    background-color: transparent;
+    box-shadow: none;
+    transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.envelope-wrapper.expanded .envelope-body,
+.envelope-wrapper.expanded .envelope-front,
+.envelope-wrapper.expanded .envelope-flap {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.envelope-wrapper.expanded .card {
+    transform: translateY(0) scale(1.1);
+    height: auto;
+    min-height: 500px;
+    transition: transform 1s ease, height 0.5s ease;
+    z-index: 10;
+}
+
+.card-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 1s ease 2.5s;
+}
+
+.envelope-wrapper.open .card-content {
+    opacity: 1;
+}
+
+h1 {
+    color: var(--text-accent);
+    font-size: 2rem;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 10px rgba(120, 82, 255, 0.5);
+    letter-spacing: 2px;
+}
+
+.message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #b0b0b0;
+    margin-bottom: 30px;
+    max-width: 80%;
+}
+
+.drawing-container {
+    width: 80%;
+    height: 250px;
+    border: 2px dashed #3a255c;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,0.4);
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+
+.placeholder-text {
+    color: #55407d;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+#uploaded-drawing {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background-color: #000;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.upload-btn {
+    padding: 12px 24px;
+    background: transparent;
+    color: var(--text-accent);
+    border: 1px solid var(--text-accent);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+/* Modal Styles Corrigidos */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    text-align: center;
+    max-width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-modal:hover {
+    color: var(--text-accent);
+}
+
+#modal-image {
+    max-width: 100%;
+    max-height: 75vh;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(120, 82, 255, 0.3);
+    border: 1px solid var(--border-color);
+}
+
+
+.gothic-frame {
+    display: inline-block;
+    padding: 10px;
+    background: #050505;
+    border: 2px solid #3a255c;
+    box-shadow: 
+        0 0 0 6px #0d0614,
+        0 0 0 8px #55407d,
+        0 0 0 14px #160a24,
+        0 0 40px 20px rgba(0, 0, 0, 0.9);
+    border-radius: 4px;
+    position: relative;
+    margin: 20px;
+}
+
+#modal-image {
+    max-width: 100%;
+    max-height: 70vh;
+    border-radius: 2px;
+    border: 2px solid #000;
+    box-shadow: inset 0 0 20px #000;
+    box-shadow: none; /* override previous rule if any */
+}
+
+
+.mute-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(13, 6, 20, 0.8);
+    border: 1px solid var(--text-accent);
+    color: var(--text-primary);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 50;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(120, 82, 255, 0.2);
+}
+
+.mute-btn:hover {
+    background: rgba(120, 82, 255, 0.2);
+    box-shadow: 0 0 15px rgba(120, 82, 255, 0.5);
+}
+
